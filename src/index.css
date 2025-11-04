@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@theme {
+  --color-primary: #003366;
+  --color-background-light: #f5f7f8;
+  --color-background-dark: #0f1923;
+
+
+  --font-display: Inter, sans-serif;
+
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+}
+
+/* Vous pouvez aussi définir ici votre configuration Dark Mode si vous voulez utiliser une variable CSS: */
+:root {
+  /* Exemple pour utiliser une variable CSS en mode sombre (si non géré par Tailwind) */
+  --bg-couleur: var(--color-background-light);
+}
+
+.dark {
+  --bg-couleur: var(--color-background-dark);
+}
