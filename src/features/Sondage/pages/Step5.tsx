@@ -1,16 +1,53 @@
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from "react";
+import type { SondageData } from "../types/sondageShema";
+
 interface propsT {
   modifyStep: (step: number) => void;
   setTitle: (title: string) => void;
+  updateData: (data: Partial<SondageData>) => void;
+  formData: Partial<SondageData>;
+  errors: any;
+  handleSubmit: () => Promise<void>; // Fonction de soumission
+  isSubmitting: boolean; // Pour l'état de chargement
 }
-import React, { useEffect, useState } from "react";
 
-export default function Step5({ setTitle, modifyStep }: propsT) {
-  const [refName, setRefName] = useState("");
-  const [refPosition, setRefPosition] = useState("");
-  const [refPhone, setRefPhone] = useState("");
-  const [remarks, setRemarks] = useState("");
-  const [signature, setSignature] = useState(""); // Pour simuler la signature
-  const [date, setDate] = useState("");
+// Helper pour afficher l'erreur
+const FormError = ({ message }: { message?: string }) => {
+  if (!message) return null;
+  return <p className="text-red-600 text-sm mt-1">{message}</p>;
+};
+
+export default function Step5({
+  setTitle,
+  modifyStep,
+  errors,
+  formData,
+  handleSubmit,
+  isSubmitting,
+  updateData,
+}: propsT) {
+  const referenceData = formData.reference || {};
+  const consentementData = formData.consentement || {};
+
+  const handleReferenceChange = (field: string, value: any) => {
+    updateData({
+      reference: {
+        ...referenceData,
+        [field]: value,
+      },
+    });
+  };
+
+  const handleConsentementChange = (field: string, value: any) => {
+    updateData({
+      consentement: {
+        ...consentementData,
+        [field]: value,
+      },
+    });
+  };
 
   // Styles CSS personnalisés pour la boîte de signature
   const customStyles = `
@@ -65,11 +102,14 @@ export default function Step5({ setTitle, modifyStep }: propsT) {
                 className="flex w-full min-w-0 flex-1 rounded-lg text-text-light focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light bg-subtle-light h-12 placeholder:text-text-light/50 pl-12 pr-4 text-base font-normal leading-normal"
                 id="ref-name"
                 placeholder="Ampidiro ny Anarana"
-                value={refName}
-                onChange={(e) => setRefName(e.target.value)}
+                value={referenceData.nom_referent || ""}
+                onChange={(e) =>
+                  handleReferenceChange("nom_referent", e.target.value)
+                }
                 type="text"
               />
             </div>
+            <FormError message={errors.reference?.nom_referent} />
           </div>
 
           {/* Church Position */}
@@ -88,11 +128,14 @@ export default function Step5({ setTitle, modifyStep }: propsT) {
                 className="flex w-full min-w-0 flex-1 rounded-lg text-text-light focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light bg-subtle-light h-12 placeholder:text-text-light/50 pl-12 pr-4 text-base font-normal leading-normal"
                 id="ref-position"
                 placeholder="e.g., Loholona, Diakona"
-                value={refPosition}
-                onChange={(e) => setRefPosition(e.target.value)}
+                value={referenceData.fonction_referent || ""}
+                onChange={(e) =>
+                  handleReferenceChange("fonction_referent", e.target.value)
+                }
                 type="text"
               />
             </div>
+            <FormError message={errors.reference?.fonction_referent} />
           </div>
 
           {/* Phone Number */}
@@ -112,10 +155,13 @@ export default function Step5({ setTitle, modifyStep }: propsT) {
                 id="ref-phone"
                 placeholder="Ampidiro ny laharana"
                 type="tel"
-                value={refPhone}
-                onChange={(e) => setRefPhone(e.target.value)}
+                value={referenceData.telephone_referent || ""}
+                onChange={(e) =>
+                  handleReferenceChange("telephone_referent", e.target.value)
+                }
               />
             </div>
+            <FormError message={errors.reference?.telephone_referent} />
           </div>
         </div>
 
@@ -128,8 +174,8 @@ export default function Step5({ setTitle, modifyStep }: propsT) {
             className="flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-text-light focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light bg-subtle-light min-h-[120px] placeholder:text-text-light/50 p-4 text-base font-normal leading-normal"
             id="remarks"
             placeholder="Any other information you'd like to share..."
-            value={remarks}
-            onChange={(e) => setRemarks(e.target.value)}
+            value={formData.remarques || ""}
+            onChange={(e) => updateData({ remarques: e.target.value })}
           ></textarea>
         </div>
 
@@ -159,11 +205,21 @@ export default function Step5({ setTitle, modifyStep }: propsT) {
               {/* Le "signature-box" est utilisé ici, le style est défini dans le bloc <style> */}
               <div
                 className="signature-box flex w-full items-center justify-center rounded-lg border border-border-light bg-subtle-light h-28 text-2xl font-bold text-text-light/40 cursor-pointer"
-                onClick={() => setSignature("Your Signature Here")} // Simuler une action de signature
+                onClick={() =>
+                  handleConsentementChange(
+                    "consentement",
+                    consentementData.consentement === "Accepté"
+                      ? ""
+                      : "Accepté"
+                  )
+                } // Simuler une action de signature
               >
-                {signature || "Sign here"}
+                {consentementData.consentement === "Accepté"
+                  ? formData.membre?.nom_complet
+                  : "Sign here"}
               </div>
             </div>
+            <FormError message={errors.consentement?.consentement} />
           </div>
 
           {/* Upload Photo & Date */}
@@ -180,21 +236,34 @@ export default function Step5({ setTitle, modifyStep }: propsT) {
                 onFocus={(e) => (e.target.type = "date")}
                 placeholder="Daty"
                 type="text"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
+                value={consentementData.date_consentement || ""}
+                onChange={(e) =>
+                  handleConsentementChange("date_consentement", e.target.value)
+                }
               />
             </div>
           </div>
+          <FormError message={errors.consentement?.date_consentement} />
         </div>
       </main>
 
       {/* Footer Button (Submit) */}
       <footer className="sticky bottom-0 bg-white/80 backdrop-blur-sm p-4 pt-2 shadow-inner">
-        <button className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-primary px-6 py-4 text-lg font-bold text-white shadow-lg transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
-          <span>Valider</span>
-          <span className="material-symbols-outlined">check_circle</span>
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-primary px-6 py-4 text-lg font-bold text-white shadow-lg transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 disabled:bg-primary/50"
+        >
+          {isSubmitting ? (
+            <>Valider... <span className="material-symbols-outlined animate-spin">sync</span></>
+          ) : (
+            <>Valider <span className="material-symbols-outlined">check_circle</span></>
+          )}
         </button>
-        <button onClick={previousStep} className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-xl bg-blend-lighten px-6 py-4 text-lg font-bold text-primary shadow-lg transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
+        <button
+          onClick={previousStep}
+          className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-xl bg-blend-lighten px-6 py-4 text-lg font-bold text-primary shadow-lg transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+        >
           <span>Hiverina</span>
         </button>
       </footer>

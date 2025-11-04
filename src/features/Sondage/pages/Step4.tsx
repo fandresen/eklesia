@@ -1,16 +1,39 @@
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect } from "react";
+import type { SondageData } from "../types/sondageShema";
+
 interface propsT {
   modifyStep: (step: number) => void;
-   setTitle:(title:string)=>void;
+  setTitle: (title: string) => void;
+  updateData: (data: Partial<SondageData>) => void;
+  formData: Partial<SondageData>;
+  errors: any;
 }
-import React, { useEffect, useState } from "react";
 
-export default function Step4({ modifyStep,setTitle }: propsT) {
-  // Gérer l'état de chaque interrupteur
-  const [isActiveInChurch, setIsActiveInChurch] = useState(false);
-  const [followsPrinciples, setFollowsPrinciples] = useState(false);
-  const [isReadyForResponsibilities, setIsReadyForResponsibilities] =
-    useState(false);
-  const [canBeContacted, setCanBeContacted] = useState(false);
+// Helper pour afficher l'erreur
+const FormError = ({ message }: { message?: string }) => {
+  if (!message) return null;
+  return <p className="text-red-600 text-sm mt-1">{message}</p>;
+};
+
+export default function Step4({
+  modifyStep,
+  setTitle,
+  updateData,
+  formData,
+  errors,
+}: propsT) {
+  const exigencesData = formData.exigences || {};
+
+  const handleExigencesChange = (field: string, value: any) => {
+    updateData({
+      exigences: {
+        ...exigencesData,
+        [field]: value,
+      },
+    });
+  };
 
   // Style CSS personnalisé intégré pour le feedback de l'interrupteur
   const customStyles = `
@@ -71,14 +94,20 @@ export default function Step4({ modifyStep,setTitle }: propsT) {
                   className="sr-only"
                   id="active-church"
                   type="checkbox"
-                  checked={isActiveInChurch}
-                  onChange={() => setIsActiveInChurch(!isActiveInChurch)}
+                  checked={exigencesData.actif_vie_religieuse === "Oui"}
+                  onChange={(e) =>
+                    handleExigencesChange(
+                      "actif_vie_religieuse",
+                      e.target.checked ? "Oui" : "Non"
+                    )
+                  }
                 />
                 <div className="switch-bg flex h-7 w-12 items-center rounded-full bg-gray-200 transition-colors">
                   <div className="switch-handle size-6 transform rounded-full bg-white shadow-md transition-transform duration-300 ease-in-out"></div>
                 </div>
               </div>
             </label>
+            <FormError message={errors.exigences?.actif_vie_religieuse} />
           </div>
 
           {/* Adventist Principles */}
@@ -94,7 +123,7 @@ export default function Step4({ modifyStep,setTitle }: propsT) {
                   </span>
                 </div>
                 <span className="flex-1 text-base font-medium text-text-light pt-3">
-                  DMifanaraka amin’ny fitsipika advantista ve ny fiainanao
+                  Mifanaraka amin’ny fitsipika advantista ve ny fiainanao
                   andavanandro?
                 </span>
               </div>
@@ -103,8 +132,13 @@ export default function Step4({ modifyStep,setTitle }: propsT) {
                   className="sr-only"
                   id="adventist-principles"
                   type="checkbox"
-                  checked={followsPrinciples}
-                  onChange={() => setFollowsPrinciples(!followsPrinciples)}
+                  checked={exigencesData.conformite_principes === "Oui"}
+                  onChange={(e) =>
+                    handleExigencesChange(
+                      "conformite_principes",
+                      e.target.checked ? "Oui" : "Non"
+                    )
+                  }
                 />
                 <div className="switch-bg flex h-7 w-12 items-center rounded-full bg-gray-200 transition-colors">
                   <div className="switch-handle size-6 transform rounded-full bg-white shadow-md transition-transform duration-300 ease-in-out"></div>
@@ -114,6 +148,7 @@ export default function Step4({ modifyStep,setTitle }: propsT) {
             <p className="mt-2 pl-16 text-sm text-text-light/60">
               Sabata, fitondran-tena, tsy fandraisana toaka, sns.
             </p>
+            <FormError message={errors.exigences?.conformite_principes} />
           </div>
 
           {/* Ready for Responsibilities */}
@@ -138,9 +173,12 @@ export default function Step4({ modifyStep,setTitle }: propsT) {
                   className="sr-only"
                   id="responsibilities"
                   type="checkbox"
-                  checked={isReadyForResponsibilities}
-                  onChange={() =>
-                    setIsReadyForResponsibilities(!isReadyForResponsibilities)
+                  checked={exigencesData.disponible_2026 === "Oui"}
+                  onChange={(e) =>
+                    handleExigencesChange(
+                      "disponible_2026",
+                      e.target.checked ? "Oui" : "Non"
+                    )
                   }
                 />
                 <div className="switch-bg flex h-7 w-12 items-center rounded-full bg-gray-200 transition-colors">
@@ -148,6 +186,7 @@ export default function Step4({ modifyStep,setTitle }: propsT) {
                 </div>
               </div>
             </label>
+            <FormError message={errors.exigences?.disponible_2026} />
           </div>
 
           {/* Contact Permission */}
@@ -171,14 +210,20 @@ export default function Step4({ modifyStep,setTitle }: propsT) {
                   className="sr-only"
                   id="contact-permission"
                   type="checkbox"
-                  checked={canBeContacted}
-                  onChange={() => setCanBeContacted(!canBeContacted)}
+                  checked={exigencesData.facilement_joignable === "Oui"}
+                  onChange={(e) =>
+                    handleExigencesChange(
+                      "facilement_joignable",
+                      e.target.checked ? "Oui" : "Non"
+                    )
+                  }
                 />
                 <div className="switch-bg flex h-7 w-12 items-center rounded-full bg-gray-200 transition-colors">
                   <div className="switch-handle size-6 transform rounded-full bg-white shadow-md transition-transform duration-300 ease-in-out"></div>
                 </div>
               </div>
             </label>
+            <FormError message={errors.exigences?.facilement_joignable} />
           </div>
         </div>
       </main>
