@@ -20,11 +20,8 @@ export default function SondageContainer() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fonction pour mettre à jour l'état partagé
-  // (Utilisez 'deep merge' si vous avez des objets imbriqués comme 'membre')
   const handleUpdateData = (update: Partial<SondageData>) => {
     setFormData((prev) => ({ ...prev, ...update }));
-    // Optionnel: effacer les erreurs pour les champs mis à jour
     if (Object.keys(errors).length > 0) {
        setErrors({});
     }
@@ -32,15 +29,21 @@ export default function SondageContainer() {
 
   const validateStep = (stepToValidate: number): boolean => {
     const schemaToValidate = stepSchemas[stepToValidate];
+    if (!schemaToValidate) return true; // Sécurité
     
-    // Zod ne valide pas 'undefined', on lui passe un objet vide s'il n'y a pas de données
+    // Fournir des valeurs par défaut pour les objets imbriqués
     const dataToValidate = {
       membre: formData.membre || {},
+      pratique_religieuse: formData.pratique_religieuse || {}, // Ajouté
       responsabilites_souhaitees: formData.responsabilites_souhaitees || [],
+      responsabilites_souhaitees_autres: formData.responsabilites_souhaitees_autres || [],
+      responsabilites_passees: formData.responsabilites_passees || [],
       competences: formData.competences || [],
+      competences_autres: formData.competences_autres || [],
       exigences: formData.exigences || {},
       consentement: formData.consentement || {},
-      // ...etc pour les autres champs
+      reference: formData.reference || {},
+      remarques: formData.remarques || "",
     };
 
     const result = schemaToValidate.safeParse(dataToValidate);
@@ -48,11 +51,10 @@ export default function SondageContainer() {
     if (!result.success) {
       const fieldErrors = {};
       result.error.issues.forEach((issue) => {
-        // 'path' est un tableau, ex: ['membre', 'nom_complet']
         const fieldName = issue.path.join('.');
         fieldErrors[fieldName] = issue.message;
       });
-      console.log("Erreurs de validation:", fieldErrors);
+      console.log(`Erreurs de validation (Étape ${stepToValidate}):`, fieldErrors);
       setErrors(fieldErrors);
       return false;
     }
@@ -62,13 +64,11 @@ export default function SondageContainer() {
   };
 
   const modifyStep = (_step: number) => {
-    // Si on avance, on valide l'étape actuelle
     if (_step > step) {
       if (!validateStep(step)) {
-        return; // Arrêter si la validation échoue
+        return; 
       }
     }
-    // Si on recule, on ne valide pas
     setStep(_step);
   };
 
@@ -76,41 +76,40 @@ export default function SondageContainer() {
     setIsSubmitting(true);
     setErrors({});
     
-    // 1. Validation finale du schéma complet
-    // On ajoute la date de consentement juste avant de valider/soumettre
-    const finalData = {
+    // Validation finale de TOUTES les étapes
+    for (let i = 1; i <= 6; i++) {
+      if (!validateStep(i)) {
+        setIsSubmitting(false);
+        // Ramener à la première étape avec une erreur
+        setStep(i);
+        console.log(`Validation finale échouée à l'étape ${i}`);
+        return;
+      }
+    }
+
+    const finalData: Partial<SondageData> = {
       ...formData,
       consentement: {
         ...formData.consentement,
-        consentement: 'Accepté', // Assumé depuis le clic
+        consentement: 'Accepté',
         date_consentement: new Date().toISOString(),
       },
     };
 
+    // Validation finale avec le schéma global
     const result = sondageSchema.safeParse(finalData);
 
     if (!result.success) {
-      const fieldErrors = {};
-      result.error.issues.forEach((issue) => {
-        const fieldName = issue.path.join('.');
-        fieldErrors[fieldName] = issue.message;
-      });
-      console.log("Erreurs soumission:", fieldErrors);
-      setErrors(fieldErrors);
+      console.error("Erreurs soumission (Schéma Global):", result.error.flatten().fieldErrors);
+      setErrors(result.error.flatten().fieldErrors);
       setIsSubmitting(false);
-      // Essayer de ramener à la première étape avec une erreur
-      const firstErrorStep = Object.keys(stepSchemas).find(s => 
-         stepSchemas[s].safeParse(finalData).success === false
-      );
-      if(firstErrorStep) setStep(Number(firstErrorStep));
-
       return;
     }
 
     // 2. Soumission API
     try {
       await submitSondage(result.data as SondageData);
-      setFormData(result.data); // Stocker les données finales validées
+      setFormData(result.data);
       setIsSubmitted(true);
     } catch (error) {
       setErrors({ global: "Tsy nandaitra ny fandefasana. Mba avereno azafady." });
@@ -119,42 +118,38 @@ export default function SondageContainer() {
     }
   };
 
-  // --- Props communes pour toutes les étapes ---
   const stepProps = {
     modifyStep: modifyStep,
     setTitle: setTitle,
     updateData: handleUpdateData,
-    formData: formData, // Les données sont retenues !
+    formData: formData,
     errors: errors,
   };
 
-  // --- Affichage du résumé après soumission ---
   if (isSubmitted) {
     return (
       <div>
-        <TopAppBar step={6} title={"Famaranana"} />
+        <TopAppBar step={7} totalSteps={6} title={"Famaranana"} />
         <Summary data={formData as SondageData} />
       </div>
     );
   }
 
-  // --- Affichage des étapes ---
   return (
     <div>
-      <TopAppBar step={step} title={title} />
+      <TopAppBar step={step} totalSteps={6} title={title} />
       {step === 1 && <Step1 {...stepProps} />}
-      {step === 2 && <Step2 modifyStep={modifyStep} setTitle={setTitle} />}
+      {step === 2 && <Step2 {...stepProps} />}
       {step === 3 && <Step3 {...stepProps} />}
       {step === 4 && <Step4 {...stepProps} />}
-       {step === 5 && <Step5 {...stepProps}/>}
-      {step === 5 && (
+      {step === 5 && <Step5 {...stepProps} />}
+      {step === 6 && (
         <Step6
           {...stepProps}
           handleSubmit={handleSubmit}
           isSubmitting={isSubmitting}
         />
       )}
-      
     </div>
   );
 }

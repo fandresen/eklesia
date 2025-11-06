@@ -1,4 +1,5 @@
 import React, { useEffect, useState, type ReactNode } from "react";
+// Assurez-vous que le chemin est correct
 import type { SondageData, ResponsabilitePassee } from "../types/sondageShema";
 import { getPostes, type Poste } from "../../../api/sondageApi";
 
@@ -12,21 +13,18 @@ interface propsT {
 }
 
 // --- Helper Components ---
-
-// Helper pour afficher l'erreur
 const FormError = ({ message }: { message?: string }) => {
   if (!message) return null;
   return <p className="text-red-600 text-sm mt-1 px-1">{message}</p>;
 };
 
-// Carte stylisée
 const Card = ({ children }: { children: ReactNode }) => (
   <div className="bg-white rounded-xl p-5 border border-border-light shadow-md shadow-primary/5 border-l-4 border-l-primary">
     {children}
   </div>
 );
 
-// --- Formulaire pour "Andraikitra Efa Nosahanina" ---
+// --- Formulaire "Andraikitra Efa Nosahanina" ---
 interface AddPastRoleFormProps {
   postes: Poste[];
   onSave: (role: ResponsabilitePassee) => void;
@@ -38,7 +36,6 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
   const [idPoste, setIdPoste] = useState<number | undefined>(undefined);
   const [nomPersonnalise, setNomPersonnalise] = useState(""); // Pour "Hafa"
   const [isCustom, setIsCustom] = useState(false); // Pour basculer l'input
-  // ... autres états ...
   const [eglise, setEglise] = useState("");
   const [typeEglise, setTypeEglise] = useState<
     "Église principale" | "Église annexe"
@@ -49,7 +46,6 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
   const [error, setError] = useState("");
 
   const handleSave = () => {
-    // --- Validation (Modifié) ---
     const hasRole = idPoste !== undefined || nomPersonnalise.trim() !== "";
     if (!hasRole || !eglise.trim() || !anneeDebut) {
       setError(
@@ -58,10 +54,9 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
       return;
     }
     setError("");
-    // --- Envoi des données (Modifié) ---
     onSave({
-      id_poste: isCustom ? undefined : idPoste, // N'envoie l'ID que si ce n'est pas "Hafa"
-      nom_poste_personnalise: isCustom ? nomPersonnalise.trim() : undefined, // N'envoie le nom que si c'est "Hafa"
+      id_poste: isCustom ? undefined : idPoste,
+      nom_poste_personnalise: isCustom ? nomPersonnalise.trim() : undefined,
       type_experience: "Assumé",
       eglise,
       type_eglise: typeEglise,
@@ -71,7 +66,6 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
     });
   };
 
-  // --- Gestion du Select (Modifié) ---
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     if (value === "HAFA") {
@@ -80,7 +74,7 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
     } else {
       setIsCustom(false);
       setIdPoste(parseInt(value));
-      setNomPersonnalise(""); // Vider le champ "Hafa"
+      setNomPersonnalise("");
     }
   };
 
@@ -89,7 +83,6 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
       <h3 className="text-base font-semibold text-primary">
         Hanampy traikefa vaovao
       </h3>
-      {/* --- Andraikitra (Poste) (Modifié) --- */}
       <div>
         <label
           className="text-sm font-medium text-text-light"
@@ -99,7 +92,7 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
         </label>
         <select
           id="id_poste"
-          value={isCustom ? "HAFA" : idPoste || ""} // Gérer la sélection
+          value={isCustom ? "HAFA" : idPoste || ""}
           onChange={handleSelectChange}
           className="mt-1 block w-full rounded-lg bg-white border border-subtle-light h-12 px-4 text-text-light focus:ring-primary/50 focus:border-primary"
         >
@@ -111,12 +104,10 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
               {p.nom_poste_mg}
             </option>
           ))}
-          {/* Option "Hafa" */}
           <option value="HAFA">-- Hafa (Farito eto ambany) --</option>
         </select>
       </div>
 
-      {/* Champ "Hafa" conditionnel */}
       {isCustom && (
         <div>
           <label
@@ -135,8 +126,7 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
           />
         </div>
       )}
-
-      {/* Anaran'ny fiangonana */}
+      {/* ... Reste du formulaire (Eglise, Taona, ...) ... */}
       <div>
         <label
           className="text-sm font-medium text-text-light"
@@ -153,18 +143,16 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
           onChange={(e) => setEglise(e.target.value)}
         />
       </div>
-
-      {/* Karazana Fiangonana */}
       <div>
         <label className="text-sm font-medium text-text-light">
           Karazana Fiangonana
         </label>
         <div className="grid grid-cols-2 gap-2 mt-1">
           <label
-            className={`flex cursor-pointer ... ${
+            className={`flex cursor-pointer items-center justify-center rounded-lg border p-3 ${
               typeEglise === "Église principale"
                 ? "bg-primary/20 border-primary"
-                : "bg-white"
+                : "bg-white border-border-light"
             }`}
             htmlFor="organized"
           >
@@ -180,10 +168,10 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
             Fiangonan-dehibe
           </label>
           <label
-            className={`flex cursor-pointer ... ${
+            className={`flex cursor-pointer items-center justify-center rounded-lg border p-3 ${
               typeEglise === "Église annexe"
                 ? "bg-primary/20 border-primary"
-                : "bg-white"
+                : "bg-white border-border-light"
             }`}
             htmlFor="group"
           >
@@ -200,8 +188,6 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
           </label>
         </div>
       </div>
-
-      {/* Taona */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label
@@ -233,7 +219,7 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
           <input
             className="mt-1 block w-full rounded-lg bg-white border border-subtle-light h-12 px-4 text-text-light focus:ring-primary/50 focus:border-primary"
             id="end-year"
-            placeholder="YYYY (tsy fenoina raha mbola mitohy)"
+            placeholder="YYYY (tsy fenoina...)"
             type="number"
             value={anneeFin || ""}
             onChange={(e) =>
@@ -242,8 +228,6 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
           />
         </div>
       </div>
-
-      {/* Fanamarihana */}
       <div>
         <label className="text-sm font-medium text-text-light" htmlFor="notes">
           Zava-bita / Traikefa manan-danja (Optional)
@@ -256,10 +240,7 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
           onChange={(e) => setRealisations(e.target.value)}
         ></textarea>
       </div>
-
       <FormError message={error} />
-
-      {/* Boutons d'action */}
       <div className="flex gap-4">
         <button
           onClick={onCancel}
@@ -277,9 +258,9 @@ function AddPastRoleForm({ postes, onSave, onCancel }: AddPastRoleFormProps) {
     </div>
   );
 }
+// ... fin du formulaire "AddPastRoleForm"
 
-// --- Composant Principal Step2 ---
-
+// --- Composant Principal Step3 ---
 export default function Step3({
   modifyStep,
   setTitle,
@@ -292,19 +273,17 @@ export default function Step3({
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
-  const [customSouhaitee, setCustomSouhaitee] = useState("");
+  const [customSouhaitee, setCustomSouhaitee] = useState(""); // Pour "Hafa" Tiana
 
   // --- Chargement des données ---
   useEffect(() => {
     setTitle("Traikefa sy Andraikitra");
-
     const fetchPostes = async () => {
       try {
         const postes = await getPostes();
         setPostesList(postes);
       } catch (err) {
         console.error("Tsy azo ny lisitry ny andraikitra:", err);
-        // Gérer l'erreur (ex: afficher un message)
       } finally {
         setIsLoading(false);
       }
@@ -313,27 +292,35 @@ export default function Step3({
   }, [setTitle]);
 
   // --- Navigation ---
-  const nextStep = () => modifyStep(4);
-  const previousStep = () => modifyStep(2);
+  const nextStep = () => modifyStep(4); // Va vers Step 4 (Talents)
+  const previousStep = () => modifyStep(2); // Vient de Step 2 (Pratique)
 
-  // --- Données du Container ---
- const responsabilitesSouhaitees = formData.responsabilites_souhaitees || [];
-  // Le nouveau champ "Hafa" pour les souhaits
-  const autresSouhaitees = formData.responsabilites_souhaitees_autres || []; 
-  const responsabilitesPassees = formData.responsabilites_passees || [];
+  // --- Données du Container (Avec protection '?.') ---
+  const responsabilitesSouhaitees =
+    formData?.responsabilites_souhaitees || [];
+  const autresSouhaitees = formData?.responsabilites_souhaitees_autres || [];
+  const responsabilitesPassees = formData?.responsabilites_passees || [];
 
   // --- Gestion "Andraikitra Tiana ho Sahanina" ---
   const handleToggleSouhaitee = (posteId: number) => {
-    const isSelected = responsabilitesSouhaitees.some(r => r.id_poste === posteId);
+    const isSelected = responsabilitesSouhaitees.some(
+      (r) => r.id_poste === posteId
+    );
     let newList = [];
     if (isSelected) {
-      newList = responsabilitesSouhaitees.filter(r => r.id_poste !== posteId);
+      newList = responsabilitesSouhaitees.filter(
+        (r) => r.id_poste !== posteId
+      );
     } else {
-      newList = [...responsabilitesSouhaitees, { id_poste: posteId, type_experience: "Souhaite assumer" }];
+      newList = [
+        ...responsabilitesSouhaitees,
+        { id_poste: posteId, type_experience: "Souhaite assumer" },
+      ];
     }
     updateData({ responsabilites_souhaitees: newList });
-  }
+  };
 
+  // --- Fonctions pour "Hafa" Tiana ---
   const handleAddAutreSouhaitee = () => {
     if (customSouhaitee.trim().length === 0) return;
     const newList = [...autresSouhaitees, customSouhaitee.trim()];
@@ -345,6 +332,7 @@ export default function Step3({
     const newList = autresSouhaitees.filter((_, i) => i !== index);
     updateData({ responsabilites_souhaitees_autres: newList });
   };
+  // --- Fin Nouveau ---
 
   const filteredPostes = postesList.filter((p) =>
     p.nom_poste_mg.toLowerCase().includes(searchTerm.toLowerCase())
@@ -354,7 +342,7 @@ export default function Step3({
   const handleSavePasse = (role: ResponsabilitePassee) => {
     const newList = [...responsabilitesPassees, role];
     updateData({ responsabilites_passees: newList });
-    setShowAddForm(false); // Cacher le formulaire après sauvegarde
+    setShowAddForm(false);
   };
 
   const handleDeletePasse = (index: number) => {
@@ -362,13 +350,16 @@ export default function Step3({
     updateData({ responsabilites_passees: newList });
   };
 
-  // Helper pour trouver le nom du poste
+  // Helper
   const getPosteName = (resp: ResponsabilitePassee): string => {
     if (resp.nom_poste_personnalise) {
       return `${resp.nom_poste_personnalise} (Hafa)`;
     }
     if (resp.id_poste) {
-      return postesList.find(p => p.id_poste === resp.id_poste)?.nom_poste_mg || `Poste ID: ${resp.id_poste}`;
+      return (
+        postesList.find((p) => p.id_poste === resp.id_poste)?.nom_poste_mg ||
+        `Poste ID: ${resp.id_poste}`
+      );
     }
     return "Andraikitra tsy fantatra";
   };
@@ -441,7 +432,59 @@ export default function Step3({
               </p>
             )}
           </div>
-          <FormError message={errors["responsabilites_souhaitees"]} />
+
+          {/* --- Ajout "Hafa" pour les souhaits --- */}
+          <div className="mt-4 pt-4 border-t border-border-light">
+            <label
+              className="text-sm font-medium text-text-light"
+              htmlFor="custom-souhaitee"
+            >
+              Andraikitra "Hafa" Tiana Sahanina
+            </label>
+            {/* Liste des "Hafa" ajoutés */}
+            <div className="space-y-2 my-2">
+              {autresSouhaitees.map((talent, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-lg bg-subtle-light p-2.5"
+                >
+                  <p className="text-text-light">{talent}</p>
+                  <button
+                    onClick={() => handleDeleteAutreSouhaitee(index)}
+                    className="text-text-light/50 hover:text-red-500 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-xl">
+                      delete
+                    </span>
+                  </button>
+                </div>
+              ))}
+            </div>
+            {/* Champ d'ajout */}
+            <div className="relative flex items-center gap-2">
+              <input
+                className="flex w-full min-w-0 flex-1 rounded-lg text-text-light focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light bg-subtle-light h-12 placeholder:text-text-light/50 px-4 text-base"
+                id="custom-souhaitee"
+                placeholder="Soraty eto, dia tsindrio 'Hanampy'"
+                value={customSouhaitee}
+                onChange={(e) => setCustomSouhaitee(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleAddAutreSouhaitee();
+                }}
+                type="text"
+              />
+              <button
+                onClick={handleAddAutreSouhaitee}
+                className="shrink-0 rounded-lg bg-primary/80 px-4 py-3 text-white shadow-lg transition-colors hover:bg-primary"
+                aria-label="Hanampy andraikitra hafa"
+              >
+                <span className="material-symbols-outlined text-lg">add</span>
+              </button>
+            </div>
+          </div>
+          {/* --- Fin Nouveau --- */}
+
+          <FormError message={errors?.["responsabilites_souhaitees"]} />
         </Card>
 
         {/* --- Andraikitra Efa Nosahanina (Passés) --- */}
@@ -450,7 +493,6 @@ export default function Step3({
             Traikefa sy Andraikitra Efa Nosahanina
           </h2>
 
-          {/* Liste des traikefa ajoutés */}
           <div className="space-y-3">
             {responsabilitesPassees.length === 0 && !showAddForm && (
               <p className="text-sm text-text-light/70 text-center p-4">
@@ -465,7 +507,7 @@ export default function Step3({
               >
                 <div>
                   <p className="font-semibold text-text-light">
-                    {getPosteNameById(resp.id_poste)}
+                    {getPosteName(resp)}
                   </p>
                   <p className="text-sm text-text-light/80">
                     {resp.eglise} ({resp.annee_debut} -{" "}
@@ -484,7 +526,6 @@ export default function Step3({
             ))}
           </div>
 
-          {/* Afficher le formulaire ou le bouton "Ajouter" */}
           {showAddForm ? (
             <AddPastRoleForm
               postes={postesList}
@@ -503,7 +544,7 @@ export default function Step3({
         </Card>
       </main>
 
-      {/* Bottom Action Buttons */}
+      {/* Footer Buttons */}
       <footer className="sticky bottom-0 bg-background-light/80 backdrop-blur-sm p-4 pt-2 shadow-inner">
         <div className="flex gap-4">
           <button

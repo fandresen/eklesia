@@ -23,34 +23,36 @@ export default function Step1({
   formData,
   errors,
 }: propsT) {
+  const membreData = formData?.membre || {};
 
-  // Récupérer les données de 'membre' ou un objet vide
-  const membreData = formData.membre || {};
+  const handleMembreChange = (field: string, value: any) => {
+    updateData({
+      membre: {
+        ...membreData,
+        [field]: value,
+      },
+    });
+  };
 
-  // Gérer le changement de 'justYear'
-  // C'est la valeur actuelle, dérivée de l'état
   const justYear = membreData.souvenir_date_bapteme === "Non";
-  
-  // CORRECTION: Mettre à jour tous les champs liés en une seule fois
+
   const setJustYear = (value: boolean) => {
     const newSouvenir = value ? "Non" : "Oui";
-    
-    // Construire le nouvel objet 'membre' avec tous les changements
+
     const newMembreData = {
       ...membreData,
       souvenir_date_bapteme: newSouvenir,
-      // Effacer le champ qui n'est plus pertinent
-      date_exacte_bapteme: (newSouvenir === "Non") ? undefined : membreData.date_exacte_bapteme,
-      annee_bapteme: (newSouvenir === "Oui") ? undefined : membreData.annee_bapteme,
+      date_exacte_bapteme:
+        newSouvenir === "Non" ? undefined : membreData.date_exacte_bapteme,
+      annee_bapteme:
+        newSouvenir === "Oui" ? undefined : membreData.annee_bapteme,
     };
 
-    // Appeler updateData une seule fois
     updateData({ membre: newMembreData });
   };
 
-
   const nextStep = () => {
-    modifyStep(2); // La validation se fait dans le container
+    modifyStep(2);
   };
 
   useEffect(() => {
@@ -59,8 +61,6 @@ export default function Step1({
 
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden antialiased bg-background-light font-display">
-      
-      {/* Form Content */}
       <main className="flex-grow px-4 py-6 space-y-6">
         {/* Full Name */}
         <div className="flex flex-col">
@@ -79,11 +79,13 @@ export default function Step1({
               id="full-name"
               placeholder="Ampidiro ny anarana feno"
               value={membreData.nom_complet || ""}
-              onChange={(e) => updateData({ membre: { ...membreData, nom_complet: e.target.value } })}
+              onChange={(e) =>
+                handleMembreChange("nom_complet", e.target.value)
+              }
               type="text"
             />
           </div>
-          <FormError message={errors["membre.nom_complet"]} />
+          <FormError message={errors?.["membre.nom_complet"]} />
         </div>
 
         {/* Date of Birth */}
@@ -98,19 +100,20 @@ export default function Step1({
             <span className="material-symbols-outlined absolute left-4 text-primary/70">
               cake
             </span>
-            {/* Logique originale (plus simple et fonctionnelle) */}
             <input
               className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light bg-subtle-light h-14 placeholder:text-text-light/50 pl-12 pr-4 text-base font-normal leading-normal shadow-sm"
               id="dob"
               value={membreData.date_naissance || ""}
-              onChange={(e) => updateData({ membre: { ...membreData, date_naissance: e.target.value } })}
+              onChange={(e) =>
+                handleMembreChange("date_naissance", e.target.value)
+              }
               onBlur={(e) => (e.target.type = "text")}
               onFocus={(e) => (e.target.type = "date")}
               placeholder="Safidio ny daty nahaterahanao"
               type="text"
             />
           </div>
-          <FormError message={errors["membre.date_naissance"]} />
+          <FormError message={errors?.["membre.date_naissance"]} />
         </div>
 
         {/* Gender */}
@@ -130,7 +133,7 @@ export default function Step1({
                 type="radio"
                 value="Homme"
                 checked={membreData.sexe === "Homme"}
-                onChange={(e) => updateData({ membre: { ...membreData, sexe: e.target.value } })}
+                onChange={(e) => handleMembreChange("sexe", e.target.value)}
               />
               <span className="ml-3 text-base font-medium text-text-light">
                 Lahy
@@ -147,14 +150,14 @@ export default function Step1({
                 type="radio"
                 value="Femme"
                 checked={membreData.sexe === "Femme"}
-                onChange={(e) => updateData({ membre: { ...membreData, sexe: e.target.value } })}
+                onChange={(e) => handleMembreChange("sexe", e.target.value)}
               />
               <span className="ml-3 text-base font-medium text-text-light">
                 Vavy
               </span>
             </label>
           </div>
-          <FormError message={errors["membre.sexe"]} />
+          <FormError message={errors?.["membre.sexe"]} />
         </div>
 
         {/* Baptism Date */}
@@ -169,7 +172,6 @@ export default function Step1({
             <span className="material-symbols-outlined absolute left-4 text-primary/70">
               water_drop
             </span>
-            {/* Utilisation de la logique originale du fichier `Step1.tsx` */}
             <input
               className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light bg-subtle-light h-14 placeholder:text-text-light/50 pl-12 pr-4 text-base font-normal leading-normal shadow-sm"
               id="baptism-date"
@@ -181,7 +183,6 @@ export default function Step1({
                   ? membreData.annee_bapteme || ""
                   : membreData.date_exacte_bapteme || ""
               }
-              // CORRECTION: Mettre à jour tous les champs liés en une seule fois
               onChange={(e) => {
                 let newAnnee: number | undefined;
                 let newDate: string | undefined;
@@ -196,14 +197,12 @@ export default function Step1({
                   newAnnee = isNaN(year) ? undefined : year;
                   newDate = dateVal;
                 }
-                
-                // Appeler updateData une seule fois
                 updateData({
                   membre: {
                     ...membreData,
                     annee_bapteme: newAnnee,
-                    date_exacte_bapteme: newDate
-                  }
+                    date_exacte_bapteme: newDate,
+                  },
                 });
               }}
               min="1900"
@@ -211,19 +210,20 @@ export default function Step1({
               step="1"
             />
           </div>
-          <FormError message={errors["membre.annee_bapteme"]} />
-          
+          <FormError message={errors?.["membre.annee_bapteme"]} />
           <div className="flex items-center justify-start gap-2 pt-3">
             <input
               className="form-checkbox h-5 w-5 rounded text-primary focus:ring-primary/50 border-gray-400 bg-transparent"
               id="date-toggle"
               type="checkbox"
               checked={justYear}
-              // `setJustYear` gère maintenant la mise à jour complète de l'état
               onChange={(e) => setJustYear(e.target.checked)}
             />
-            <label className="text-sm text-text-light/80" htmlFor="date-toggle">
-             Ny Taona ihany no tadidiko
+            <label
+              className="text-sm text-text-light/80"
+              htmlFor="date-toggle"
+            >
+              Ny Taona ihany no tadidiko
             </label>
           </div>
         </div>
@@ -245,11 +245,11 @@ export default function Step1({
               id="address"
               placeholder="Ampidiro ny Adiresy"
               value={membreData.adresse || ""}
-              onChange={(e) => updateData({ membre: { ...membreData, adresse: e.target.value } })}
+              onChange={(e) => handleMembreChange("adresse", e.target.value)}
               type="text"
             />
           </div>
-          <FormError message={errors["membre.adresse"]} />
+          <FormError message={errors?.["membre.adresse"]} />
         </div>
 
         {/* Phone Number (Optional) */}
@@ -271,10 +271,12 @@ export default function Step1({
               placeholder="Apidiro ny laharana"
               type="tel"
               value={membreData.telephone || ""}
-              onChange={(e) => updateData({ membre: { ...membreData, telephone: e.target.value } })}
+              onChange={(e) =>
+                handleMembreChange("telephone", e.target.value)
+              }
             />
           </div>
-          <FormError message={errors["membre.telephone"]} />
+          <FormError message={errors?.["membre.telephone"]} />
         </div>
 
         {/* Email (Optional) */}
@@ -296,17 +298,18 @@ export default function Step1({
               placeholder="Apidiro ny adiresy email"
               type="email"
               value={membreData.email || ""}
-              onChange={(e) => updateData({ membre: { ...membreData, email: e.target.value } })}
+              onChange={(e) => handleMembreChange("email", e.target.value)}
             />
           </div>
-          <FormError message={errors["membre.email"]} />
+          <FormError message={errors?.["membre.email"]} />
         </div>
 
-        {/* Actual Church Name */}
+        {/* --- NOUVEAUX CHAMPS --- */}
+        {/* Eglise Actuelle */}
         <div className="flex flex-col">
           <label
             className="text-base font-medium leading-normal text-text-light pb-2"
-            htmlFor="actual_church"
+            htmlFor="eglise_actuelle"
           >
             Fiangonana Ankehitriny
           </label>
@@ -316,44 +319,50 @@ export default function Step1({
             </span>
             <input
               className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light bg-subtle-light h-14 placeholder:text-text-light/50 pl-12 pr-4 text-base font-normal leading-normal shadow-sm"
-              id="actual_church"
-              placeholder="Ex:Ambolokandrina"
-              // value={membreData.adresse || ""}
-              // onChange={(e) => updateData({ membre: { ...membreData, adresse: e.target.value } })}
+              id="eglise_actuelle"
+              value={membreData.eglise_actuelle || "Ambolokandrina"}
+              onChange={(e) =>
+                handleMembreChange("eglise_actuelle", e.target.value)
+              }
               type="text"
             />
           </div>
-          <FormError message={errors["membre.adresse"]} />
+          <FormError message={errors?.["membre.eglise_actuelle"]} />
         </div>
 
-        {/* Actual Church Name */}
+        {/* Eglise Precedente */}
         <div className="flex flex-col">
           <label
             className="text-base font-medium leading-normal text-text-light pb-2"
-            htmlFor="acient_church"
+            htmlFor="eglise_precedente"
           >
-            Fiangonana nisy anao Taloha
+            Fiangonana nisy anao Taloha (Raha nifindra)
           </label>
           <div className="relative flex items-center">
             <span className="material-symbols-outlined absolute left-4 text-primary/70">
-              church
+              history
             </span>
             <input
               className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light bg-subtle-light h-14 placeholder:text-text-light/50 pl-12 pr-4 text-base font-normal leading-normal shadow-sm"
-              id="ancient_church"
-              placeholder="Ex:Ambolokandrina"
-              // value={membreData.adresse || ""}
-              // onChange={(e) => updateData({ membre: { ...membreData, adresse: e.target.value } })}
+              id="eglise_precedente"
+              placeholder="Ex: Soamanandrariny"
+              value={membreData.eglise_precedente || ""}
+              onChange={(e) =>
+                handleMembreChange("eglise_precedente", e.target.value)
+              }
               type="text"
             />
           </div>
-          <FormError message={errors["membre.adresse"]} />
+          <FormError message={errors?.["membre.eglise_precedente"]} />
         </div>
+        {/* --- FIN NOUVEAUX CHAMPS --- */}
       </main>
 
-      {/* Bottom Action Button */}
       <footer className="sticky bottom-0 bg-background-light/80 backdrop-blur-sm p-4 pt-2 shadow-inner">
-        <button onClick={()=>nextStep()} className="flex w-full items-center justify-center rounded-xl bg-primary px-6 py-4 text-lg font-bold text-white shadow-lg transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
+        <button
+          onClick={() => nextStep()}
+          className="flex w-full items-center justify-center rounded-xl bg-primary px-6 py-4 text-lg font-bold text-white shadow-lg transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+        >
           Manaraka
         </button>
       </footer>
