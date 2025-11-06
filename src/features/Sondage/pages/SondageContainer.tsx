@@ -1,13 +1,16 @@
 import { useState } from "react";
 import TopAppBar from "../components/TopAppBar";
+
+import { submitSondage } from "../../../api/sondageApi";
+import { sondageSchema, stepSchemas, type SondageData } from "../types/sondageShema";
+import Summary from "./Summary";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import Step4 from "./Step4";
 import Step5 from "./Step5";
-import { submitSondage } from "../../../api/sondageApi";
-import { sondageSchema, stepSchemas, type SondageData } from "../types/sondageShema";
-import Summary from "./Summary";
+import Step6 from "./Step6";
+
 
 export default function SondageContainer() {
   const [step, setStep] = useState(1);
@@ -140,16 +143,18 @@ export default function SondageContainer() {
     <div>
       <TopAppBar step={step} title={title} />
       {step === 1 && <Step1 {...stepProps} />}
-      {step === 2 && <Step2 {...stepProps} />}
+      {step === 2 && <Step2 modifyStep={modifyStep} setTitle={setTitle} />}
       {step === 3 && <Step3 {...stepProps} />}
       {step === 4 && <Step4 {...stepProps} />}
+       {step === 5 && <Step5 {...stepProps}/>}
       {step === 5 && (
-        <Step5
+        <Step6
           {...stepProps}
           handleSubmit={handleSubmit}
           isSubmitting={isSubmitting}
         />
       )}
+      
     </div>
   );
 }

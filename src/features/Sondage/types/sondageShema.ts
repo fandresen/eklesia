@@ -44,21 +44,31 @@ const membreSchema = z.object({
 });
 
 
+//Step 2
+// const exigencesSchema2 = z.object({
+//   actif_vie_religieuse: z.enum(["Oui", "Non"], { errorMap: () => ({ message: "Valio azafady" }) }),
+//   conformite_principes: z.enum(["Oui", "Non"], { errorMap: () => ({ message: "Valio azafady" }) }),
+//   disponible_2026: z.enum(["Oui", "Non", "Je ne sais pas"], { errorMap: () => ({ message: "Valio azafady" }) }),
+//   facilement_joignable: z.enum(["Oui", "Non"], { errorMap: () => ({ message: "Valio azafady" }) }),
+// });
+
+
 // 2. Responsabilités (Step 2)
 export const responsabilitePasseeSchema = z.object({
-  id_poste: z.number(),
+  id_poste: z.number().optional(), // L'ID n'est plus requis
+  nom_poste_personnalise: z.string().optional(), // Champ pour "Hafa"
   type_experience: z.literal("Assumé"),
   eglise: z.string().min(1, "Anaran'ny fiangonana"),
   type_eglise: z.enum(["Église principale", "Église annexe"]),
-  annee_debut: z.number(),
+  annee_debut: z.number({required_error: "Taona fenoina"}),
   annee_fin: z.number().optional(),
   realisations: z.string().optional(),
-});
-export type ResponsabilitePassee = z.infer<typeof responsabilitePasseeSchema>; // Exporter le type
-
-const responsabiliteSouhaiteeSchema = z.object({
-  id_poste: z.number(),
-  type_experience: z.literal("Souhaite assumer"),
+}).refine(data => {
+    // Il faut soit un id_poste, soit un nom personnalisé
+    return data.id_poste !== undefined || (data.nom_poste_personnalise && data.nom_poste_personnalise.length > 0);
+}, {
+    message: "Tsy maintsy misafidy andraikitra ianao na manoratra 'Hafa'",
+    path: ["id_poste"],
 });
 
 
@@ -137,12 +147,12 @@ export type SondageData = z.infer<typeof sondageSchema>;
 export const stepSchemas = {
   1: z.object({ membre: membreSchema }),
   2: z.object({
-    responsabilites_souhaitees: z
-      .array(responsabiliteSouhaiteeSchema)
-      .min(1, "Safidio farafahakeliny andraikitra iray tianao sahanina"),
-    responsabilites_passees: z
-      .array(responsabilitePasseeSchema)
-      .optional(),
+    // responsabilites_souhaitees: z
+    //   .array(responsabiliteSouhaiteeSchema)
+    //   .min(1, "Safidio farafahakeliny andraikitra iray tianao sahanina"),
+    // responsabilites_passees: z
+    //   .array(responsabilitePasseeSchema)
+    //   .optional(),
   }),
   3: step3Schema, 
   4: z.object({ exigences: exigencesSchema }),

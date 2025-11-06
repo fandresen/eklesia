@@ -301,6 +301,54 @@ export default function Step1({
           </div>
           <FormError message={errors["membre.email"]} />
         </div>
+
+        {/* Actual Church Name */}
+        <div className="flex flex-col">
+          <label
+            className="text-base font-medium leading-normal text-text-light pb-2"
+            htmlFor="actual_church"
+          >
+            Fiangonana Ankehitriny
+          </label>
+          <div className="relative flex items-center">
+            <span className="material-symbols-outlined absolute left-4 text-primary/70">
+              church
+            </span>
+            <input
+              className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light bg-subtle-light h-14 placeholder:text-text-light/50 pl-12 pr-4 text-base font-normal leading-normal shadow-sm"
+              id="actual_church"
+              placeholder="Ex:Ambolokandrina"
+              // value={membreData.adresse || ""}
+              // onChange={(e) => updateData({ membre: { ...membreData, adresse: e.target.value } })}
+              type="text"
+            />
+          </div>
+          <FormError message={errors["membre.adresse"]} />
+        </div>
+
+        {/* Actual Church Name */}
+        <div className="flex flex-col">
+          <label
+            className="text-base font-medium leading-normal text-text-light pb-2"
+            htmlFor="acient_church"
+          >
+            Fiangonana nisy anao Taloha
+          </label>
+          <div className="relative flex items-center">
+            <span className="material-symbols-outlined absolute left-4 text-primary/70">
+              church
+            </span>
+            <input
+              className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light bg-subtle-light h-14 placeholder:text-text-light/50 pl-12 pr-4 text-base font-normal leading-normal shadow-sm"
+              id="ancient_church"
+              placeholder="Ex:Ambolokandrina"
+              // value={membreData.adresse || ""}
+              // onChange={(e) => updateData({ membre: { ...membreData, adresse: e.target.value } })}
+              type="text"
+            />
+          </div>
+          <FormError message={errors["membre.adresse"]} />
+        </div>
       </main>
 
       {/* Bottom Action Button */}
